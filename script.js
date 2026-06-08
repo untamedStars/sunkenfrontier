@@ -17,6 +17,30 @@ camera.rotation.order = "YXZ";
 // Renderer
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+// ===== POINTER LOCK SETUP =====
+
+const canvas = renderer.domElement;
+
+// request lock on click
+canvas.addEventListener("click", () => {
+    canvas.requestPointerLock();
+});
+
+// detect lock/unlock
+document.addEventListener("pointerlockchange", () => {
+    if (document.pointerLockElement === canvas) {
+        console.log("Pointer locked");
+    } else {
+        console.log("Pointer unlocked");
+    }
+});
+
+// error handler (helps debug if it fails)
+document.addEventListener("pointerlockerror", () => {
+    console.log("Pointer lock failed");
+});
+renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setClearColor(0x000000);
 document.body.appendChild(renderer.domElement);
@@ -82,6 +106,10 @@ document.addEventListener("click", () => {
     document.body.requestPointerLock();
 });
 
+let yaw = 0;
+let pitch = 0;
+
+
 document.addEventListener("mousemove", (e) => {
     if (document.pointerLockElement !== document.body) return;
 
@@ -116,6 +144,10 @@ function move() {
 // Loop
 function animate() {
     requestAnimationFrame(animate);
+
+    camera.rotation.order = "YXZ";
+    camera.rotation.y = yaw;
+    camera.rotation.x = pitch;
 
     camera.rotation.y = yaw;
     camera.rotation.x = pitch;
