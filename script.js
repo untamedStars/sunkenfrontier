@@ -1,5 +1,12 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.179.1/build/three.module.js';
 
+let yaw = 0;
+let pitch = 0;
+
+document.addEventListener("click", () => {
+    document.body.requestPointerLock();
+});
+
 // Scene
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x202840);
