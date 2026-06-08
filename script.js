@@ -80,13 +80,6 @@ wall(-5, 2.5, 0, 0.2, 5, 10);
 wall(5, 2.5, 0, 0.2, 5, 10);
 
 // Objects
-const bed = new THREE.Mesh(
-    new THREE.BoxGeometry(2, 0.5, 1),
-    mat
-);
-bed.position.set(-3, 0.25, 3);
-scene.add(bed);
-
 const locker = new THREE.Mesh(
     new THREE.BoxGeometry(1, 3, 1),
     mat
@@ -144,8 +137,8 @@ function move() {
 
     if (keys["w"]) camera.position.add(dir.clone().multiplyScalar(speed));
     if (keys["s"]) camera.position.add(dir.clone().multiplyScalar(-speed));
-    if (keys["a"]) camera.position.add(right.clone().multiplyScalar(speed));
-    if (keys["d"]) camera.position.add(right.clone().multiplyScalar(-speed));
+    if (keys["d"]) camera.position.add(right.clone().multiplyScalar(speed));
+    if (keys["a"]) camera.position.add(right.clone().multiplyScalar(-speed));
 }
 
 // Loop
