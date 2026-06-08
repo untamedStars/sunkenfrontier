@@ -45,12 +45,19 @@ renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setClearColor(0x000000);
 document.body.appendChild(renderer.domElement);
 
-// Light
-const light = new THREE.PointLight(0xffffff, 2);
-light.position.set(0, 4, 0);
-scene.add(light);
+// soft base light (fills shadows)
+const ambient = new THREE.AmbientLight(0xffffff, 0.9);
+scene.add(ambient);
 
-scene.add(new THREE.AmbientLight(0xffffff, 0.3));
+// main ceiling light
+const mainLight = new THREE.PointLight(0xffffff, 3);
+mainLight.position.set(0, 4, 0);
+scene.add(mainLight);
+
+// optional: subtle bluish sci-fi tint
+const tint = new THREE.PointLight(0x88ccff, 1.5);
+tint.position.set(0, 2, 0);
+scene.add(tint);
 
 // Material
 const mat = new THREE.MeshStandardMaterial({ color: 0x888888 });
