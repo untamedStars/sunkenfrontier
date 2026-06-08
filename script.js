@@ -137,8 +137,8 @@ function move() {
 
     if (keys["w"]) camera.position.add(dir.clone().multiplyScalar(speed));
     if (keys["s"]) camera.position.add(dir.clone().multiplyScalar(-speed));
-    if (keys["d"]) camera.position.add(right.clone().multiplyScalar(speed));
     if (keys["a"]) camera.position.add(right.clone().multiplyScalar(-speed));
+    if (keys["d"]) camera.position.add(right.clone().multiplyScalar(speed));
 }
 
 // Loop
