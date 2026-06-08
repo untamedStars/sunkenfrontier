@@ -1,106 +1,72 @@
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.179.1/build/three.module.js';
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x87ceeb);
 
-// Player state
-let player = {
-  x: 0,
-  y: 10,
-  z: 0,
-  angle: 0
-};
+const camera = new THREE.PerspectiveCamera(
+    75,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    1000
+);
 
-// Controls
-let keys = {};
-
-document.addEventListener("keydown", e => keys[e.key.toLowerCase()] = true);
-document.addEventListener("keyup", e => keys[e.key.toLowerCase()] = false);
-
-// Mouse look
-document.addEventListener("mousemove", (e) => {
-  player.angle += e.movementX * 0.002;
+const renderer = new THREE.WebGLRenderer({
+    canvas: document.getElementById("game")
 });
 
-// Simple ocean floor height function
-function getFloorHeight(x, z) {
-  return Math.sin(x * 0.05) * 2 + Math.cos(z * 0.05) * 2;
+renderer.setSize(window.innerWidth, window.innerHeight);
+
+// Ocean
+const oceanGeometry = new THREE.PlaneGeometry(1000, 1000);
+
+const oceanMaterial = new THREE.MeshBasicMaterial({
+    color: 0x0066aa
+});
+
+const ocean = new THREE.Mesh(
+    oceanGeometry,
+    oceanMaterial
+);
+
+ocean.rotation.x = -Math.PI / 2;
+
+scene.add(ocean);
+
+// Floating science pod
+const podGeometry = new THREE.BoxGeometry(2, 2, 2);
+
+const podMaterial = new THREE.MeshBasicMaterial({
+    color: 0xffffff
+});
+
+const pod = new THREE.Mesh(
+    podGeometry,
+    podMaterial
+);
+
+pod.position.y = 1;
+
+scene.add(pod);
+
+camera.position.set(0, 5, 10);
+
+function animate() {
+    requestAnimationFrame(animate);
+
+    pod.rotation.y += 0.01;
+
+    renderer.render(scene, camera);
 }
 
-// Game loop
-function update() {
-  let speed = 0.3;
+animate();
 
-  if (keys["w"]) {
-    player.x += Math.sin(player.angle) * speed;
-    player.z += Math.cos(player.angle) * speed;
-  }
-  if (keys["s"]) {
-    player.x -= Math.sin(player.angle) * speed;
-    player.z -= Math.cos(player.angle) * speed;
-  }
-  if (keys["a"]) {
-    player.x -= Math.cos(player.angle) * speed;
-    player.z += Math.sin(player.angle) * speed;
-  }
-  if (keys["d"]) {
-    player.x += Math.cos(player.angle) * speed;
-    player.z -= Math.sin(player.angle) * speed;
-  }
+window.addEventListener("resize", () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
 
-  render();
-  requestAnimationFrame(update);
-}
+    camera.updateProjectionMatrix();
 
-// Render scene
-function render() {
-  // Ocean fog background
-  ctx.fillStyle = "#001a2b";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  // Fake water gradient
-  let gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-  gradient.addColorStop(0, "#003a55");
-  gradient.addColorStop(1, "#001018");
-
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  // Draw simple "floor tiles"
-  for (let i = -10; i < 10; i++) {
-    for (let j = -10; j < 10; j++) {
-      let worldX = player.x + i * 5;
-      let worldZ = player.z + j * 5;
-
-      let height = getFloorHeight(worldX, worldZ);
-
-      let dx = worldX - player.x;
-      let dz = worldZ - player.z;
-
-      // rotate relative to camera
-      let x = dx * Math.cos(player.angle) - dz * Math.sin(player.angle);
-      let z = dx * Math.sin(player.angle) + dz * Math.cos(player.angle);
-
-      if (z <= 0) continue;
-
-      let size = 200 / z;
-
-      let screenX = canvas.width / 2 + x * 200 / z;
-      let screenY = canvas.height / 2 + height * 20 / z;
-
-      // fade with distance (ocean visibility)
-      let alpha = Math.max(0, 1 - z / 50);
-
-      ctx.fillStyle = `rgba(124,199,255,${alpha * 0.3})`;
-
-      ctx.fillRect(screenX, screenY, size, size);
-    }
-  }
-
-  // Underwater tint overlay
-  ctx.fillStyle = "rgba(0, 20, 40, 0.3)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-}
-
-update();
+    renderer.setSize(
+        window.innerWidth,
+        window.innerHeight
+    );
+});
