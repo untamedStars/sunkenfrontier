@@ -78,11 +78,24 @@ document.addEventListener(
 // LIGHTING
 // ====================
 
-const ambient = new THREE.AmbientLight(
-    0xaaccff,
-    1.2
+// Main ceiling light
+const ceilingLight = new THREE.PointLight(
+    0xffffff,
+    25,
+    20
 );
+
+ceilingLight.position.set(0, 4.5, 0);
+scene.add(ceilingLight);
+
+// Soft fill light
+const ambient = new THREE.AmbientLight(
+    0x88bbff,
+    0.3
+);
+
 scene.add(ambient);
+
 // ====================
 // MATERIALS
 // ====================
@@ -141,18 +154,46 @@ wall(5, 2.5, 0, 0.2, 5, 10);
 // OBJECTS
 // ====================
 
-const locker = new THREE.Mesh(
-    new THREE.BoxGeometry(1, 3, 1),
+const fabricator = new THREE.Mesh(
+    new THREE.BoxGeometry(0.8, 1.5, 0.3),
     accentMat
 );
 
-scene.add(locker);
-
-const bed = new THREE.Mesh(
-    new THREE.BoxGeometry(2, 0.5, 1),
-    bedMat
+fabricator.position.set(
+    4.7,
+    1.8,
+    0
 );
-scene.add(bed);
+
+scene.add(fabricator);
+
+const lifepodLocker = new THREE.Mesh(
+    new THREE.BoxGeometry(1, 2.5, 1),
+    accentMat
+);
+
+lifepodLocker.position.set(
+    -3.5,
+    1.25,
+    3.5
+);
+
+scene.add(lifepodLocker);
+
+const radio = new THREE.Mesh(
+    new THREE.BoxGeometry(0.6, 0.4, 0.3),
+    new THREE.MeshStandardMaterial({
+        color: 0x222222
+    })
+);
+
+radio.position.set(
+    -4.6,
+    2.5,
+    0
+);
+
+scene.add(radio);
 
 // ====================
 // INPUT
