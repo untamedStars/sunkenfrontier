@@ -5,7 +5,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.179.1/build/three.m
 // ====================
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x000000);
+scene.background = new THREE.Color(0x081421);
 
 // ====================
 // CAMERA
@@ -79,154 +79,79 @@ document.addEventListener(
 // ====================
 
 const ambient = new THREE.AmbientLight(
-    0xffffff,
-    0.9
+    0xaaccff,
+    1.2
 );
 scene.add(ambient);
-
-const mainLight = new THREE.PointLight(
-    0xffffff,
-    3
-);
-
-mainLight.position.set(0, 4, 0);
-scene.add(mainLight);
-
-const tint = new THREE.PointLight(
-    0x88ccff,
-    1.5
-);
-
-tint.position.set(0, 2, 0);
-scene.add(tint);
-
 // ====================
 // MATERIALS
 // ====================
 
-const mat = new THREE.MeshStandardMaterial({
-    color: 0x888888,
-    metalness: 0.1,
+const wallMat = new THREE.MeshStandardMaterial({
+    color: 0x6b7280,
+    metalness: 0.3,
     roughness: 0.6
+});
+
+const floorMat = new THREE.MeshStandardMaterial({
+    color: 0x2a3440,
+    metalness: 0.2,
+    roughness: 0.8
+});
+
+const accentMat = new THREE.MeshStandardMaterial({
+    color: 0xffaa00,
+    metalness: 0.4,
+    roughness: 0.4
+});
+
+const bedMat = new THREE.MeshStandardMaterial({
+    color: 0x3b82f6,
+    metalness: 0.1,
+    roughness: 0.7
 });
 
 // ====================
 // ROOM
 // ====================
 
-function wall(x, y, z, w, h, d) {
-
+function wall(x, y, z, w, h, d, material = wallMat) {
     const mesh = new THREE.Mesh(
-        new THREE.BoxGeometry(
-            w,
-            h,
-            d
-        ),
-        mat
+        new THREE.BoxGeometry(w, h, d),
+        material
     );
 
-    mesh.position.set(
-        x,
-        y,
-        z
-    );
-
+    mesh.position.set(x, y, z);
     scene.add(mesh);
 }
 
 // Floor
-wall(
-    0,
-    -0.1,
-    0,
-    10,
-    0.2,
-    10
-);
+wall(0, -0.1, 0, 10, 0.2, 10, floorMat);
 
 // Ceiling
-wall(
-    0,
-    5,
-    0,
-    10,
-    0.2,
-    10
-);
+wall(0, 5, 0, 10, 0.2, 10);
 
 // Walls
-wall(
-    0,
-    2.5,
-    -5,
-    10,
-    5,
-    0.2
-);
-
-wall(
-    0,
-    2.5,
-    5,
-    10,
-    5,
-    0.2
-);
-
-wall(
-    -5,
-    2.5,
-    0,
-    0.2,
-    5,
-    10
-);
-
-wall(
-    5,
-    2.5,
-    0,
-    0.2,
-    5,
-    10
-);
+wall(0, 2.5, -5, 10, 5, 0.2);
+wall(0, 2.5, 5, 10, 5, 0.2);
+wall(-5, 2.5, 0, 0.2, 5, 10);
+wall(5, 2.5, 0, 0.2, 5, 10);
 
 // ====================
 // OBJECTS
 // ====================
 
 const locker = new THREE.Mesh(
-    new THREE.BoxGeometry(
-        1,
-        3,
-        1
-    ),
-    mat
-);
-
-locker.position.set(
-    3.5,
-    1.5,
-    3.5
+    new THREE.BoxGeometry(1, 3, 1),
+    accentMat
 );
 
 scene.add(locker);
 
 const bed = new THREE.Mesh(
-    new THREE.BoxGeometry(
-        2,
-        0.5,
-        1
-    ),
-    mat
+    new THREE.BoxGeometry(2, 0.5, 1),
+    bedMat
 );
-
-bed.position.set(
-    -3,
-    0.25,
-    3
-);
-
 scene.add(bed);
 
 // ====================
