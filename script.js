@@ -1,15 +1,8 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.179.1/build/three.module.js';
 
-let yaw = 0;
-let pitch = 0;
-
-document.addEventListener("click", () => {
-    document.body.requestPointerLock();
-});
-
 // Scene
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x202840);
+scene.background = new THREE.Color(0x000000);
 
 // Camera
 const camera = new THREE.PerspectiveCamera(
@@ -18,89 +11,57 @@ const camera = new THREE.PerspectiveCamera(
     0.1,
     1000
 );
-
 camera.position.set(0, 1.7, 0);
+camera.rotation.order = "YXZ";
 
 // Renderer
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setClearColor(0x000000);
 document.body.appendChild(renderer.domElement);
 
-// Lights
-const ambient = new THREE.AmbientLight(0xffffff, 2);
-scene.add(ambient);
-
-const light = new THREE.PointLight(0xffffff, 10);
+// Light
+const light = new THREE.PointLight(0xffffff, 2);
 light.position.set(0, 4, 0);
 scene.add(light);
 
-// Materials
-const wallMat = new THREE.MeshLambertMaterial({
-    color: 0x888888
-});
+scene.add(new THREE.AmbientLight(0xffffff, 0.3));
 
-const objectMat = new THREE.MeshLambertMaterial({
-    color: 0xaaaaaa
-});
+// Material
+const mat = new THREE.MeshStandardMaterial({ color: 0x888888 });
 
-// Floor
-const floor = new THREE.Mesh(
-    new THREE.BoxGeometry(10, 0.2, 10),
-    wallMat
-);
-floor.position.y = -0.1;
-scene.add(floor);
-
-// Ceiling
-const ceiling = new THREE.Mesh(
-    new THREE.BoxGeometry(10, 0.2, 10),
-    wallMat
-);
-ceiling.position.y = 5;
-scene.add(ceiling);
-
-// Walls
-function createWall(x, y, z, w, h, d) {
-    const wall = new THREE.Mesh(
-        new THREE.BoxGeometry(w, h, d),
-        wallMat
-    );
-
-    wall.position.set(x, y, z);
-    scene.add(wall);
+// Room (lifepod)
+function wall(x, y, z, w, h, d) {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+    m.position.set(x, y, z);
+    scene.add(m);
 }
 
-createWall(0, 2.5, -5, 10, 5, 0.2);
-createWall(0, 2.5, 5, 10, 5, 0.2);
-createWall(-5, 2.5, 0, 0.2, 5, 10);
-createWall(5, 2.5, 0, 0.2, 5, 10);
+// Floor / ceiling
+wall(0, -0.1, 0, 10, 0.2, 10);
+wall(0, 5, 0, 10, 0.2, 10);
 
-// Bed
+// Walls
+wall(0, 2.5, -5, 10, 5, 0.2);
+wall(0, 2.5, 5, 10, 5, 0.2);
+wall(-5, 2.5, 0, 0.2, 5, 10);
+wall(5, 2.5, 0, 0.2, 5, 10);
+
+// Objects
 const bed = new THREE.Mesh(
     new THREE.BoxGeometry(2, 0.5, 1),
-    objectMat
+    mat
 );
-
 bed.position.set(-3, 0.25, 3);
 scene.add(bed);
 
-// Locker
 const locker = new THREE.Mesh(
     new THREE.BoxGeometry(1, 3, 1),
-    objectMat
+    mat
 );
-
 locker.position.set(3.5, 1.5, 3.5);
 scene.add(locker);
-
-// Fabricator
-const fabricator = new THREE.Mesh(
-    new THREE.BoxGeometry(1, 2, 0.5),
-    objectMat
-);
-
-fabricator.position.set(4.4, 1, 0);
-scene.add(fabricator);
 
 // Movement
 const keys = {};
@@ -113,42 +74,64 @@ document.addEventListener("keyup", e => {
     keys[e.key.toLowerCase()] = false;
 });
 
+// Pointer lock + mouse look
+let yaw = 0;
+let pitch = 0;
+
+document.addEventListener("click", () => {
+    document.body.requestPointerLock();
+});
+
+document.addEventListener("mousemove", (e) => {
+    if (document.pointerLockElement !== document.body) return;
+
+    const sens = 0.002;
+
+    yaw -= e.movementX * sens;
+    pitch -= e.movementY * sens;
+
+    const limit = Math.PI / 2 - 0.1;
+    pitch = Math.max(-limit, Math.min(limit, pitch));
+});
+
+// Movement speed
 const speed = 0.08;
 
-function movePlayer() {
+function move() {
+    const dir = new THREE.Vector3();
+    camera.getWorldDirection(dir);
+    dir.y = 0;
+    dir.normalize();
 
-    if (keys["w"]) camera.position.z -= speed;
-    if (keys["s"]) camera.position.z += speed;
-    if (keys["a"]) camera.position.x -= speed;
-    if (keys["d"]) camera.position.x += speed;
+    const right = new THREE.Vector3()
+        .crossVectors(dir, new THREE.Vector3(0, 1, 0))
+        .normalize();
 
-    // Keep player inside pod
-    camera.position.x = Math.max(-4.5, Math.min(4.5, camera.position.x));
-    camera.position.z = Math.max(-4.5, Math.min(4.5, camera.position.z));
+    if (keys["w"]) camera.position.add(dir.clone().multiplyScalar(speed));
+    if (keys["s"]) camera.position.add(dir.clone().multiplyScalar(-speed));
+    if (keys["a"]) camera.position.add(right.clone().multiplyScalar(speed));
+    if (keys["d"]) camera.position.add(right.clone().multiplyScalar(-speed));
 }
 
-// Animation Loop
+// Loop
 function animate() {
     requestAnimationFrame(animate);
 
-    movePlayer();
+    camera.rotation.y = yaw;
+    camera.rotation.x = pitch;
+
+    move();
 
     renderer.render(scene, camera);
 }
 
 animate();
 
-// Resize
+// Resize fix (IMPORTANT for no white edges)
 window.addEventListener("resize", () => {
-
-    camera.aspect =
-        window.innerWidth / window.innerHeight;
-
+    camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
 
-    renderer.setSize(
-        window.innerWidth,
-        window.innerHeight
-    );
-
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
 });
