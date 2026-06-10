@@ -1,24 +1,42 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Lifepod Prototype</title>
+    <title>Lifepod Interior</title>
     <style>
         body { margin: 0; overflow: hidden; }
         canvas { display: block; }
+        #overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: black;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: monospace;
+            cursor: pointer;
+        }
     </style>
 </head>
 
 <body>
+<div id="overlay">CLICK TO ENTER LIFEPOD</div>
+
 <script type="module">
 
 import * as THREE from 'https://unpkg.com/three@0.180.0/build/three.module.js';
+import { PointerLockControls } from 'https://unpkg.com/three@0.180.0/examples/jsm/controls/PointerLockControls.js';
 
 /* -----------------------------
-   SCENE SETUP
+   BASIC SETUP
 ----------------------------- */
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x0b1a2a);
+scene.fog = new THREE.Fog(0x0b1a2a, 2, 8);
 
 const camera = new THREE.PerspectiveCamera(
     75,
@@ -27,59 +45,68 @@ const camera = new THREE.PerspectiveCamera(
     1000
 );
 
-camera.position.set(0, 2, 6);
+camera.position.set(0, 1.2, 0);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 /* -----------------------------
+   CONTROLS (FIRST PERSON)
+----------------------------- */
+
+const controls = new PointerLockControls(camera, document.body);
+scene.add(controls.getObject());
+
+const overlay = document.getElementById("overlay");
+
+overlay.addEventListener("click", () => {
+    controls.lock();
+});
+
+controls.addEventListener("lock", () => {
+    overlay.style.display = "none";
+});
+
+controls.addEventListener("unlock", () => {
+    overlay.style.display = "flex";
+});
+
+/* -----------------------------
    LIGHTING
 ----------------------------- */
 
-const light = new THREE.DirectionalLight(0xffffff, 2);
-light.position.set(5, 10, 5);
+const light = new THREE.PointLight(0xffffff, 1.5, 10);
+light.position.set(0, 2, 0);
 scene.add(light);
 
 const ambient = new THREE.AmbientLight(0xffffff, 0.3);
 scene.add(ambient);
 
 /* -----------------------------
-   MATERIALS
+   INTERIOR ROOM (THE POD)
 ----------------------------- */
 
-const bodyMaterial = new THREE.MeshStandardMaterial({
-    color: 0x9aa3ad,
-    roughness: 0.8,
-    metalness: 0.2
-});
-
-const detailMaterial = new THREE.MeshStandardMaterial({
-    color: 0x444b52,
-    roughness: 0.9
-});
-
-/* -----------------------------
-   LIFEPOD BODY
------------------------------ */
-
-const lifepod = new THREE.Mesh(
-    new THREE.CapsuleGeometry(2, 4, 16, 32),
-    bodyMaterial
+const room = new THREE.Mesh(
+    new THREE.CylinderGeometry(2.2, 2.2, 4.5, 32, 1, true),
+    new THREE.MeshStandardMaterial({
+        color: 0x2b2f36,
+        side: THREE.BackSide
+    })
 );
 
-scene.add(lifepod);
+scene.add(room);
 
 /* -----------------------------
    DOOR
 ----------------------------- */
 
 const door = new THREE.Mesh(
-    new THREE.BoxGeometry(1.2, 1.8, 0.2),
-    detailMaterial
+    new THREE.BoxGeometry(1.2, 1.8, 0.1),
+    new THREE.MeshStandardMaterial({ color: 0x444b52 })
 );
 
-door.position.set(0, -0.5, 2.05);
+door.position.set(0, 0.5, -2.1);
 scene.add(door);
 
 /* -----------------------------
@@ -95,33 +122,8 @@ const windowMesh = new THREE.Mesh(
     })
 );
 
-windowMesh.position.set(0, 0.5, 2.05);
+windowMesh.position.set(0, 1.2, -2.1);
 scene.add(windowMesh);
-
-/* -----------------------------
-   ROOF HATCH
------------------------------ */
-
-const hatch = new THREE.Mesh(
-    new THREE.CircleGeometry(0.8, 32),
-    detailMaterial
-);
-
-hatch.rotation.x = Math.PI / 2;
-hatch.position.y = 2.2;
-scene.add(hatch);
-
-/* -----------------------------
-   LADDER (placeholder)
------------------------------ */
-
-const ladder = new THREE.Mesh(
-    new THREE.BoxGeometry(0.2, 3, 0.2),
-    detailMaterial
-);
-
-ladder.position.set(-1.5, 0, 0);
-scene.add(ladder);
 
 /* -----------------------------
    SEAT
@@ -129,26 +131,52 @@ scene.add(ladder);
 
 const seat = new THREE.Mesh(
     new THREE.BoxGeometry(0.8, 0.8, 0.8),
-    detailMaterial
+    new THREE.MeshStandardMaterial({ color: 0x555555 })
 );
 
-seat.position.set(0, -0.5, 0.5);
+seat.position.set(0, 0.2, 1.2);
 scene.add(seat);
 
 /* -----------------------------
-   ANIMATION LOOP
+   LADDER (simple placeholder)
 ----------------------------- */
 
-const clock = new THREE.Clock();
+const ladder = new THREE.Mesh(
+    new THREE.BoxGeometry(0.2, 3, 0.2),
+    new THREE.MeshStandardMaterial({ color: 0x666666 })
+);
+
+ladder.position.set(-2.0, 1.5, 0);
+ladder.rotation.z = Math.PI / 2;
+scene.add(ladder);
+
+/* -----------------------------
+   MOVEMENT (WASD)
+----------------------------- */
+
+const keys = {};
+
+document.addEventListener("keydown", (e) => keys[e.code] = true);
+document.addEventListener("keyup", (e) => keys[e.code] = false);
+
+function updateMovement() {
+
+    const speed = 0.05;
+
+    if (keys["KeyW"]) controls.moveForward(speed);
+    if (keys["KeyS"]) controls.moveForward(-speed);
+    if (keys["KeyA"]) controls.moveRight(-speed);
+    if (keys["KeyD"]) controls.moveRight(speed);
+}
+
+/* -----------------------------
+   LOOP
+----------------------------- */
 
 function animate() {
     requestAnimationFrame(animate);
 
-    const time = clock.getElapsedTime();
-
-    // Floating motion
-    lifepod.position.y = Math.sin(time * 0.5) * 0.1;
-    lifepod.rotation.y = Math.sin(time * 0.2) * 0.02;
+    updateMovement();
 
     renderer.render(scene, camera);
 }
@@ -156,15 +184,18 @@ function animate() {
 animate();
 
 /* -----------------------------
-   RESIZE HANDLING
+   RESIZE
 ----------------------------- */
 
-window.addEventListener('resize', () => {
+window.addEventListener("resize", () => {
+
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
+
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
 </script>
+
 </body>
 </html>
