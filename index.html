@@ -1,12 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lifepod Interior</title>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        canvas { display: block; }
+
+        #overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: black;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: monospace;
+            cursor: pointer;
+            user-select: none;
+        }
+    </style>
+</head>
+
+<body>
+
+<div id="overlay">CLICK TO ENTER LIFEPOD</div>
+
+<script type="module">
+
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js';
 
 /* -----------------------------
-   SCENE SETUP
+   SCENE
 ----------------------------- */
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x0b1a2a);
 scene.fog = new THREE.Fog(0x0b1a2a, 2, 8);
+
+/* -----------------------------
+   CAMERA
+----------------------------- */
 
 const camera = new THREE.PerspectiveCamera(
     75,
@@ -17,12 +53,16 @@ const camera = new THREE.PerspectiveCamera(
 
 camera.position.set(0, 1.2, 0);
 
+/* -----------------------------
+   RENDERER
+----------------------------- */
+
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 /* -----------------------------
-   INPUT SYSTEM
+   INPUT
 ----------------------------- */
 
 const keys = {};
@@ -30,12 +70,12 @@ const keys = {};
 document.addEventListener("keydown", e => keys[e.code] = true);
 document.addEventListener("keyup", e => keys[e.code] = false);
 
+/* -----------------------------
+   MOUSE LOOK (FPS)
+----------------------------- */
+
 let yaw = 0;
 let pitch = 0;
-
-/* -----------------------------
-   POINTER LOCK + MOUSE LOOK
------------------------------ */
 
 document.body.addEventListener("click", () => {
     document.body.requestPointerLock();
@@ -53,7 +93,7 @@ document.addEventListener("mousemove", (e) => {
 });
 
 /* -----------------------------
-   MOVEMENT SYSTEM
+   MOVEMENT
 ----------------------------- */
 
 function updateMovement() {
@@ -176,3 +216,8 @@ window.addEventListener("resize", () => {
 
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
+
+</script>
+
+</body>
+</html>
