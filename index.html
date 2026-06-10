@@ -1,65 +1,12 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Lifepod Interior</title>
-    <style>
-        body { margin: 0; overflow: hidden; }
-        canvas { display: block; }
-        #overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: black;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: monospace;
-            cursor: pointer;
-        }
-    </style>
-    
-</head>
-
-<body>
-<div id="overlay">CLICK TO ENTER LIFEPOD</div>
-
-<script type="module">
-
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js';
-    
+
 /* -----------------------------
-   BASIC SETUP
+   SCENE SETUP
 ----------------------------- */
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x0b1a2a);
 scene.fog = new THREE.Fog(0x0b1a2a, 2, 8);
-
-const keys = {};
-
-document.addEventListener("keydown", e => keys[e.code] = true);
-document.addEventListener("keyup", e => keys[e.code] = false);
-
-let yaw = 0;
-let pitch = 0;
-
-document.addEventListener("mousemove", (e) => {
-    if (!document.pointerLockElement) return;
-
-    yaw -= e.movementX * 0.002;
-    pitch -= e.movementY * 0.002;
-
-    pitch = Math.max(-1.5, Math.min(1.5, pitch));
-
-    camera.rotation.set(pitch, yaw, 0);
-});
-
-document.body.addEventListener("click", () => {
-    document.body.requestPointerLock();
-});
 
 const camera = new THREE.PerspectiveCamera(
     75,
@@ -75,7 +22,38 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 /* -----------------------------
-   CONTROLS (FIRST PERSON)
+   INPUT SYSTEM
+----------------------------- */
+
+const keys = {};
+
+document.addEventListener("keydown", e => keys[e.code] = true);
+document.addEventListener("keyup", e => keys[e.code] = false);
+
+let yaw = 0;
+let pitch = 0;
+
+/* -----------------------------
+   POINTER LOCK + MOUSE LOOK
+----------------------------- */
+
+document.body.addEventListener("click", () => {
+    document.body.requestPointerLock();
+});
+
+document.addEventListener("mousemove", (e) => {
+    if (document.pointerLockElement !== document.body) return;
+
+    yaw -= e.movementX * 0.002;
+    pitch -= e.movementY * 0.002;
+
+    pitch = Math.max(-1.5, Math.min(1.5, pitch));
+
+    camera.rotation.set(pitch, yaw, 0);
+});
+
+/* -----------------------------
+   MOVEMENT SYSTEM
 ----------------------------- */
 
 function updateMovement() {
@@ -100,11 +78,6 @@ function updateMovement() {
     if (keys["KeyD"]) camera.position.addScaledVector(right, speed);
 }
 
-    document.body.addEventListener("click", () => {
-    document.body.requestPointerLock();
-});
-
-
 /* -----------------------------
    LIGHTING
 ----------------------------- */
@@ -117,7 +90,7 @@ const ambient = new THREE.AmbientLight(0xffffff, 0.3);
 scene.add(ambient);
 
 /* -----------------------------
-   INTERIOR ROOM (THE POD)
+   LIFEPOD INTERIOR
 ----------------------------- */
 
 const room = new THREE.Mesh(
@@ -127,7 +100,6 @@ const room = new THREE.Mesh(
         side: THREE.BackSide
     })
 );
-
 scene.add(room);
 
 /* -----------------------------
@@ -138,7 +110,6 @@ const door = new THREE.Mesh(
     new THREE.BoxGeometry(1.2, 1.8, 0.1),
     new THREE.MeshStandardMaterial({ color: 0x444b52 })
 );
-
 door.position.set(0, 0.5, -2.1);
 scene.add(door);
 
@@ -154,7 +125,6 @@ const windowMesh = new THREE.Mesh(
         opacity: 0.6
     })
 );
-
 windowMesh.position.set(0, 1.2, -2.1);
 scene.add(windowMesh);
 
@@ -166,39 +136,20 @@ const seat = new THREE.Mesh(
     new THREE.BoxGeometry(0.8, 0.8, 0.8),
     new THREE.MeshStandardMaterial({ color: 0x555555 })
 );
-
 seat.position.set(0, 0.2, 1.2);
 scene.add(seat);
 
 /* -----------------------------
-   LADDER (simple placeholder)
+   LADDER
 ----------------------------- */
 
 const ladder = new THREE.Mesh(
     new THREE.BoxGeometry(0.2, 3, 0.2),
     new THREE.MeshStandardMaterial({ color: 0x666666 })
 );
-
 ladder.position.set(-2.0, 1.5, 0);
 ladder.rotation.z = Math.PI / 2;
 scene.add(ladder);
-
-/* -----------------------------
-   MOVEMENT (WASD)
------------------------------ */
-
-document.addEventListener("keydown", (e) => keys[e.code] = true);
-document.addEventListener("keyup", (e) => keys[e.code] = false);
-
-function updateMovement() {
-
-    const speed = 0.05;
-
-    if (keys["KeyW"]) controls.moveForward(speed);
-    if (keys["KeyS"]) controls.moveForward(-speed);
-    if (keys["KeyA"]) controls.moveRight(-speed);
-    if (keys["KeyD"]) controls.moveRight(speed);
-}
 
 /* -----------------------------
    LOOP
@@ -225,8 +176,3 @@ window.addEventListener("resize", () => {
 
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
-
-</script>
-
-</body>
-</html>
