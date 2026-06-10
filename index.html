@@ -69,6 +69,16 @@ overlay.addEventListener("click", async () => {
     }
 });
 
+    controls.addEventListener("lock", () => {
+    overlay.style.display = "none";
+    console.log("LOCKED ✔");
+});
+
+controls.addEventListener("unlock", () => {
+    overlay.style.display = "flex";
+    console.log("UNLOCKED ❌");
+});
+
 
 
 /* -----------------------------
