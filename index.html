@@ -38,6 +38,29 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x0b1a2a);
 scene.fog = new THREE.Fog(0x0b1a2a, 2, 8);
 
+const keys = {};
+
+document.addEventListener("keydown", e => keys[e.code] = true);
+document.addEventListener("keyup", e => keys[e.code] = false);
+
+let yaw = 0;
+let pitch = 0;
+
+document.addEventListener("mousemove", (e) => {
+    if (!document.pointerLockElement) return;
+
+    yaw -= e.movementX * 0.002;
+    pitch -= e.movementY * 0.002;
+
+    pitch = Math.max(-1.5, Math.min(1.5, pitch));
+
+    camera.rotation.set(pitch, yaw, 0);
+});
+
+document.body.addEventListener("click", () => {
+    document.body.requestPointerLock();
+});
+
 const camera = new THREE.PerspectiveCamera(
     75,
     window.innerWidth / window.innerHeight,
@@ -55,30 +78,31 @@ document.body.appendChild(renderer.domElement);
    CONTROLS (FIRST PERSON)
 ----------------------------- */
 
-const controls = new PointerLockControls(camera, document.body);
-scene.add(controls.getObject());
+function updateMovement() {
 
-const overlay = document.getElementById("overlay");
+    const speed = 0.05;
 
-overlay.addEventListener("click", async () => {
-    try {
-        await controls.lock();
-        console.log("Pointer locked!");
-    } catch (e) {
-        console.log("Pointer lock failed:", e);
-    }
+    const forward = new THREE.Vector3(
+        -Math.sin(yaw),
+        0,
+        -Math.cos(yaw)
+    );
+
+    const right = new THREE.Vector3(
+        -forward.z,
+        0,
+        forward.x
+    );
+
+    if (keys["KeyW"]) camera.position.addScaledVector(forward, speed);
+    if (keys["KeyS"]) camera.position.addScaledVector(forward, -speed);
+    if (keys["KeyA"]) camera.position.addScaledVector(right, -speed);
+    if (keys["KeyD"]) camera.position.addScaledVector(right, speed);
+}
+
+    document.body.addEventListener("click", () => {
+    document.body.requestPointerLock();
 });
-
-    controls.addEventListener("lock", () => {
-    overlay.style.display = "none";
-    console.log("LOCKED ✔");
-});
-
-controls.addEventListener("unlock", () => {
-    overlay.style.display = "flex";
-    console.log("UNLOCKED ❌");
-});
-
 
 
 /* -----------------------------
