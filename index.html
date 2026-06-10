@@ -60,17 +60,16 @@ scene.add(controls.getObject());
 
 const overlay = document.getElementById("overlay");
 
-overlay.addEventListener("click", () => {
-    controls.lock();
+overlay.addEventListener("click", async () => {
+    try {
+        await controls.lock();
+        console.log("Pointer locked!");
+    } catch (e) {
+        console.log("Pointer lock failed:", e);
+    }
 });
 
-controls.addEventListener("lock", () => {
-    overlay.style.display = "none";
-});
 
-controls.addEventListener("unlock", () => {
-    overlay.style.display = "flex";
-});
 
 /* -----------------------------
    LIGHTING
