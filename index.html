@@ -95,10 +95,10 @@ document.addEventListener("pointerlockchange", () => {
 document.addEventListener("mousemove", (e) => {
     if (document.pointerLockElement !== document.body) return;
 
-    yaw -= e.movementX * 0.002;
-    pitch -= e.movementY * 0.002;
+    yaw -= e.movementX * 0.0015;
+    pitch -= e.movementY * 0.0015;
 
-    pitch = Math.max(-1.5, Math.min(1.5, pitch));
+pitch = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, pitch));
 
     camera.rotation.set(pitch, yaw, 0);
 });
@@ -145,7 +145,10 @@ scene.add(ambient);
 ----------------------------- */
 
 const room = new THREE.Mesh(
-    new THREE.CylinderGeometry(2.2, 2.2, 4.5, 32, 1, true),
+    new THREE.CylinderGeometry(4, 4, 7, 32, 1, true)
+    new THREE.CircleGeometry(4, 32)
+    floor.position.y = -3.5;
+    ceiling.position.y = 3.5;
     new THREE.MeshStandardMaterial({
         color: 0x2b2f36,
         side: THREE.BackSide
